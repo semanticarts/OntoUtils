@@ -1,0 +1,22 @@
+#!/bin/bash
+if [ "$1" = "/?" -o "$1" = "/help" -o "$1" = "-?" -o "$1" = "--help" ]
+then
+  echo -e "Converts any RDF to RDF-XML.\n\
+Follows UNIX filter conventions.
+List as many input files as you like on the command line.\n\
+All output will go to stdout.\n\
+Source file format is deduced from input filename extension.\n\
+You can make source format explicit with "--source-format=xxx" at the END of the command line."
+  exit
+fi
+
+TEMPFILE=/tmp/serializeTtl-`date -u '+%Y%m%dT%H%M%SZ'``openssl rand -hex 4`
+
+java -jar $RDF_TOOLKIT_JAR --source $* --target $TEMPFILE --target-format turtle --use-dtd-subset -ibn -ibi -sdt explicit
+
+if [ $? -eq 0 ]
+then
+  cat $TEMPFILE
+  rm $TEMPFILE
+fi
+

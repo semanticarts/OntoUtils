@@ -1,0 +1,27 @@
+#!/bin/bash
+if [ "$1" = "/?" -o "$1" = "/help" -o "$1" = "-?" -o "$1" = "--help" ]
+then
+  echo "\"Serializes\" and possibly also converts a list of files to RDF-XML.\n\
+List as many input files as you like on the command line.\n\
+Source file format is deduced from input filename extension.\n\
+Output files created in the current directory.\n\
+If format being changed, output file will have a ".ttl" extension.\n\
+WARNING! If a source file is in the current directory and has extension .owl or .rdf, it will be replaced with the output!"
+  exit
+fi
+
+for f in $*
+do
+  base=`basename "$f"`
+  ext=`echo "$base" | cut -d. -s -f2-`
+  prevext="$ext"  # Loop necessary to detect real suffix if filename contains multiple '.'
+  while [ -n "$prevext" ]
+  do
+    ext="$prevext"
+    prevext=`echo "$ext" | cut -d. -s -f2-`
+  done
+  base=`basename "$f" ".$ext"`
+  
+  java -jar $RDF_TOOLKIT_JAR --source $f --target "$base".ttl --target-format turtle --use-dtd-subset -ibn -ibi -sdt explicit
+done
+
